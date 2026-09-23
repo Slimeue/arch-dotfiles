@@ -1,0 +1,8 @@
+# matugen rewrites these from theme/.config/theme/templates/ on every
+# wallpaper change -- they are output, not source. Never stow them.
+#   kitty/colors.conf      wofi/style.css        dunst/dunstrc
+#   hypr/colors.lua        hypr/hyprtoolkit.conf gtk-{3,4}.0/gtk.css
+#   qt6ct/colors/wallpaper.conf                  theme/state/palette.json
+**/theme/state/
+**/theme/backups/
+*.bak

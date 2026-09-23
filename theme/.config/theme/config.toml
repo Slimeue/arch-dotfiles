@@ -1,0 +1,82 @@
+# ~/.config/theme/config.toml
+# matugen configuration for the wallpaper-driven theme manager.
+#
+# Every [templates.*] block reads a file from ~/.config/theme/templates/,
+# substitutes the palette matugen derived from the current wallpaper, and
+# writes the result to the app's real config path.
+#
+# Nothing here should be edited to change *colours* -- colours come from the
+# wallpaper. Edit the template files to change layout, spacing or which
+# palette role an element uses.
+
+[config]
+# Do not let matugen try to reload apps itself; theme-apply.sh owns reloading
+# so that ordering is predictable.
+reload_apps = false
+
+# --------------------------------------------------------------------------
+# ANSI terminal colours.
+#
+# A raw Material palette has no notion of "red" or "green", but a terminal
+# needs them: `git diff` must show red as red. `blend = true` harmonises each
+# hue towards the wallpaper's source colour while preserving its identity, so
+# the terminal stays readable and still feels part of the theme.
+#
+# Only the six base hues are defined here. Declaring separate bright_* custom
+# colours does NOT work: harmonisation pulls a hue and its brighter sibling to
+# the same result (measured: bright_green #95d5a8 vs green #95d5a7 -- a single
+# step apart, indistinguishable in a terminal). The bright variants are instead
+# derived in the kitty template with a `lighten` filter, which guarantees they
+# stay separated from their base.
+# --------------------------------------------------------------------------
+[config.custom_colors]
+red     = { color = "#ed8796", blend = true }
+green   = { color = "#a6da95", blend = true }
+yellow  = { color = "#eed49f", blend = true }
+blue    = { color = "#8aadf4", blend = true }
+magenta = { color = "#f5bde6", blend = true }
+cyan    = { color = "#8bd5ca", blend = true }
+
+# --------------------------------------------------------------------------
+# Templates
+#
+# There is deliberately no quickshell block. The bar replaced waybar and
+# reads state/palette.json itself through a watched FileView, so it needs
+# no rendered stylesheet and no reload signal.
+# --------------------------------------------------------------------------
+
+[templates.kitty]
+input_path  = '~/.config/theme/templates/kitty-colors.conf'
+output_path = '~/.config/kitty/colors.conf'
+
+[templates.wofi]
+input_path  = '~/.config/theme/templates/wofi-style.css'
+output_path = '~/.config/wofi/style.css'
+
+[templates.dunst]
+input_path  = '~/.config/theme/templates/dunstrc'
+output_path = '~/.config/dunst/dunstrc'
+
+[templates.hyprland]
+input_path  = '~/.config/theme/templates/hypr-colors.lua'
+output_path = '~/.config/hypr/colors.lua'
+
+[templates.hyprtoolkit]
+input_path  = '~/.config/theme/templates/hyprtoolkit.conf'
+output_path = '~/.config/hypr/hyprtoolkit.conf'
+
+[templates.gtk3]
+input_path  = '~/.config/theme/templates/gtk.css'
+output_path = '~/.config/gtk-3.0/gtk.css'
+
+[templates.gtk4]
+input_path  = '~/.config/theme/templates/gtk.css'
+output_path = '~/.config/gtk-4.0/gtk.css'
+
+[templates.qt6ct]
+input_path  = '~/.config/theme/templates/qt6ct-colors.conf'
+output_path = '~/.config/qt6ct/colors/wallpaper.conf'
+
+[templates.palette]
+input_path  = '~/.config/theme/templates/palette.json'
+output_path = '~/.config/theme/state/palette.json'

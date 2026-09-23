@@ -1,0 +1,14 @@
+# ~/.config/wofi/config -- defaults for every wofi invocation.
+# Per-launch flags on the command line override these.
+
+show=dmenu
+width=600
+height=400
+lines=10
+prompt=Search
+insensitive=true
+allow_markup=true
+no_actions=true
+hide_scroll=true
+term=kitty
+key_expand=Tab
