@@ -59,7 +59,7 @@ hl.on("hyprland.start", function ()
 	hl.exec_cmd("hyprlock")
 	hl.exec_cmd(terminal)
 	hl.exec_cmd("nm-applet")
-	hl.exec_cmd("quickshell")
+	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/shell-restore.sh")
 	hl.exec_cmd("librewolf")
 	-- wallpaper daemon + re-apply the last used wallpaper
 	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper-restore.sh")
@@ -328,6 +328,8 @@ hl.bind(mainMod .. " + B", hl.dsp.exec_cmd("librewolf"))
 hl.bind(mainMod .. " + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper-picker.sh"))
 -- Flip the current theme between its light and dark variant, same wallpaper.
 hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/theme/theme-toggle.sh"))
+-- W = wallpaper, SHIFT + W = theme, CTRL + W = shell: the whole "look" family on one key.
+hl.bind(mainMod .. " + CTRL + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/shell-picker.sh"))
 
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 

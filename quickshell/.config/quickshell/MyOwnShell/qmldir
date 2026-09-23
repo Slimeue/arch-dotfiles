@@ -1,0 +1,13 @@
+singleton Style 1.0 Style.qml
+singleton Theme 1.0 Theme.qml
+singleton Time 1.0 Time.qml
+
+Bar 1.0 Bar.qml
+Island 1.0 Island.qml
+
+# Widgets -- plain content, no container dependency.
+Workspaces 1.0 Workspaces.qml
+MediaControls 1.0 MediaControls.qml
+WindowTitle 1.0 WindowTitle.qml
+Tray 1.0 Tray.qml
+Clock 1.0 Clock.qml

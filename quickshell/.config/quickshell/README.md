@@ -1,61 +1,32 @@
 # quickshell
 
-A vertical left-edge bar for Hyprland, modelled on [caelestia-dots/shell][cae]
-but written in plain QML — no C++ plugin, no build step. Saving any file
-hot-reloads it.
+Each subdirectory here is a complete, self-contained Quickshell config,
+launched with `qs -c <Name>`. There is deliberately no `shell.qml` at this
+level: a root config becomes the nameless "default" that a bare `qs` runs,
+outside anything the picker knows about. One consequence: `qs list` now needs
+`--all`, since without `-c` it looks only for that default.
 
-[cae]: https://github.com/caelestia-dots/shell
+## The configs
 
-## Layout
+- **CaelestiaReplicate** — vertical left-edge bar modelled on caelestia-dots.
+  See its own README for the module layout.
+- **MyOwnShell** — the original horizontal island bar: clock, media controls,
+  window title, workspaces and tray.
 
-Directories are QML modules. Quickshell exposes the config root as `qs`, so
-`services/Colours.qml` is imported as `qs.services` — there is no `qmldir` to
-maintain, and a `pragma Singleton` file is registered as a singleton
-automatically.
+## Switching
 
-```
-config/      design tokens and user options        no dependencies
-utils/       pure lookup tables                    no dependencies
-services/    singletons holding live system state  depends on config
-components/  generic widgets, nothing bar-specific depends on config, services
-modules/     the surfaces themselves               depends on all of the above
-shell.qml    composition root, declares no UI
-```
-
-Imports only point down that list. A module may use a component, a component
-may use a service, and nothing reaches back up. Adding a launcher or dashboard
-means a new directory under `modules/` and one line in `shell.qml`.
-
-## Where to change things
-
-| Want to | Edit |
-|---|---|
-| Reorder, add or hide a bar widget | `config/Config.qml` → `bar.entries` |
-| Change bar width, workspace count, clock format | `config/Config.qml` |
-| Change spacing, radii, fonts, animation speed | `config/Appearance.qml` |
-| Change colours | nothing here — see below |
-| Add an icon | `utils/Icons.qml` |
-
-## Colours
-
-`services/Colours.qml` reads `~/.config/theme/state/palette.json`, which matugen
-rewrites on every wallpaper change. The bar recolours itself live; there is no
-template for it in `~/.config/theme/config.toml` and nothing to reload.
-
-Every colour has a literal fallback, so a missing or half-written palette costs
-you the wallpaper colours, never a bar that fails to start.
-
-## Adding an icon
-
-Glyphs come from the Material Design block inside JetBrainsMono Nerd Font.
-Codepoints there are **five** hex digits, and `\uXXXX` in JavaScript consumes
-only four — `"0"` silently means U+F020 followed by `"0"`, which renders a
-plausible wrong icon rather than an error. Always write `"\u{f0200}"`.
-
-## Restoring the previous horizontal bar
+Press `SUPER + CTRL + W` for the wofi menu, or call the applier directly:
 
 ```sh
-git -C ~/dotfiles checkout pre-caelestia-bar -- quickshell/
+~/.config/hypr/scripts/shell-apply.sh CaelestiaReplicate
 ```
 
-Tarball copies are also in `~/backups/quickshell-<timestamp>.tar.gz`.
+Either way the old instance is killed before the new one starts, and the name
+is written to `~/.cache/current-quickshell`. Hyprland replays that choice at
+login through `shell-restore.sh`, which falls back to `CaelestiaReplicate` if
+the cache is missing or names a config that no longer exists.
+
+## Adding a config
+
+Make a directory with a `shell.qml` in it. The picker lists whatever it finds,
+so there is nothing else to register.
