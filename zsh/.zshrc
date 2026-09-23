@@ -141,6 +141,9 @@ setopt ALWAYS_TO_END
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'   # case-insensitive
 zstyle ':completion:*' menu select
 
+# Personal scripts
+export PATH="$HOME/bin:$PATH"
+
 # Editor
 export EDITOR="nvim"
 export VISUAL="nvim"

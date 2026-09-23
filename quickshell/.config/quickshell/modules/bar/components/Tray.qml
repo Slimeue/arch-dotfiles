@@ -2,45 +2,63 @@ pragma ComponentBehavior: Bound
 
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Widgets
 import Quickshell.Services.SystemTray
+import qs.components
+import qs.config
+import qs.services
 
-// StatusNotifierItem tray. Draws nothing while no app is registered, so on a
-// quiet session it costs no space.
-RowLayout {
+// StatusNotifierItem tray, stacked vertically.
+//
+// Collapses to zero height while no app has registered, so a quiet session
+// costs no space in the bar. The pointer handling below is unchanged from the
+// horizontal bar this replaces -- it was already right, and tray semantics do
+// not depend on which way the bar runs.
+ColumnLayout {
     id: root
 
-    // The window menus anchor to. Popups are real surfaces and need one.
+    // Menus are real Wayland surfaces and need a window to anchor to.
     required property var window
 
-    spacing: 10
+    spacing: Appearance.spacing.small
 
     Repeater {
         model: SystemTray.items
 
         Item {
             id: entry
+
             required property SystemTrayItem modelData
 
-            implicitWidth: 18
-            implicitHeight: 18
+            Layout.alignment: Qt.AlignHCenter
+
+            implicitWidth: Appearance.font.size.large
+            implicitHeight: Appearance.font.size.large
 
             IconImage {
                 anchors.fill: parent
+
                 source: entry.modelData.icon
                 // Dim until hovered, so the tray reads as secondary to the
                 // workspaces and clock rather than competing with them.
-                opacity: hover.hovered ? 1.0 : 0.75
+                opacity: hover.hovered ? 1 : 0.75
 
                 Behavior on opacity {
-                    NumberAnimation { duration: Style.animDuration }
+                    Anim {
+                        duration: Appearance.anim.durations.expressiveFastEffects
+                    }
                 }
             }
 
-            HoverHandler { id: hover }
+            HoverHandler {
+                id: hover
+            }
 
-            function openMenu() {
-                const p = entry.mapToItem(null, 0, entry.height);
+            function openMenu(): void {
+                // Anchor to the right edge, since the bar is on the left and a
+                // menu opening leftwards would run off the screen.
+                const p = entry.mapToItem(null, entry.width, 0);
                 entry.modelData.display(root.window, Math.round(p.x), Math.round(p.y));
             }
 
@@ -62,7 +80,8 @@ RowLayout {
             TapHandler {
                 acceptedButtons: Qt.RightButton
                 onTapped: {
-                    if (entry.modelData.hasMenu) entry.openMenu();
+                    if (entry.modelData.hasMenu)
+                        entry.openMenu();
                 }
             }
 
