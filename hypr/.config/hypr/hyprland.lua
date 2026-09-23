@@ -426,6 +426,8 @@ hl.window_rule({
     name  = "move-hyprland-run",
     match = { class = "hyprland-run" },
 
-    move  = "20 monitor_h-120",
+    -- x clears the 56px left bar (CaelestiaReplicate) by the same 20px the
+    -- window keeps from every other edge; harmless under the top-bar config.
+    move  = "76 monitor_h-120",
     float = true,
 })
