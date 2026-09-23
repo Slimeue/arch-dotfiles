@@ -11,7 +11,7 @@ Singleton {
     // so the bar keeps sitting where your eye already expects it.
     property int barHeight: 38
     property int islandHeight: 28
-    property int islandRadius: 8
+    property int islandRadius: 0
     property int islandPadding: 10
     property int islandSpacing: 8
     property int groupSpacing: 4      // gap between islands within a group

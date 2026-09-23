@@ -12,10 +12,13 @@ Rectangle {
     implicitWidth: row.implicitWidth + island.padding * 2
     implicitHeight: Style.islandHeight
 
-    radius: Style.islandRadius
+    // # TODO: need to change where when its not single island we they need to have separate styling.
+    // radius: Style.islandRadius
+    bottomLeftRadius: Style.islandRadius
+    bottomRightRadius: Style.islandRadius
     color: Style.islandBg
-    border.width: 1
-    border.color: Theme.outlineVar
+    // border.width: 1
+    // border.color: Theme.outlineVar
     visible: row.implicitWidth > 0   // collapse when there is nothing to show
 
     Behavior on color {

@@ -108,9 +108,9 @@ Scope {
 
                 Island {
                     anchors.fill: parent
-                    anchors.leftMargin: Style.screenMargin
-                    anchors.rightMargin: Style.screenMargin
-                    anchors.topMargin: (Style.barHeight - Style.islandHeight) / 2
+                    // anchors.leftMargin: Style.screenMargin
+                    // anchors.rightMargin: Style.screenMargin
+                    // anchors.topMargin: (Style.barHeight - Style.islandHeight) / 2
                     anchors.bottomMargin: (Style.barHeight - Style.islandHeight) / 2
 
                     spacing: Style.islandSpacing * 2
