@@ -27,7 +27,24 @@ stow -t ~ zsh bash git hypr nvim quickshell kitty wofi theme qt6ct htop misc
     ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
   ```
 
-- **nvm** — `.bashrc` sources `/usr/share/nvm/init-nvm.sh` (`pacman -S nvm`).
+- **caelestia shell** — `quickshell/.config/quickshell/caelestia` is a symlink
+  to `/home/slime/github-repos/shell`, an upstream clone that needs building.
+  Install its dependencies from its README ("Manual installation"), plus
+  `cmake`, `ninja` and the separate `caelestia-cli` for the `caelestia`
+  command, then:
+
+  ```sh
+  git clone https://github.com/caelestia-dots/shell.git ~/github-repos/shell
+  cd ~/github-repos/shell
+  cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/
+  cmake --build build
+  sudo cmake --install build
+  ```
+
+  The link is absolute, so under a username other than `slime`, repoint it
+  after stowing: `ln -sfn ~/github-repos/shell ~/.config/quickshell/caelestia`.
+
+- **nvm** — `.bashrc` and `.zshrc` source `/usr/share/nvm/init-nvm.sh` (`pacman -S nvm`).
 - **`start-hyprland`** — shipped by the `hyprland` package, not a local script.
 - **Generated theme output** — see `.gitignore`. The sources live in
   `theme/.config/theme/templates/`; matugen renders them into each app's real
