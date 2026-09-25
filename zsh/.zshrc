@@ -166,3 +166,6 @@ alias wallpapers="cd ~/Pictures/Wallpapers"
 
 # zsh-autosuggestions: dim the ghost text so it reads as a suggestion
 ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=8"
+
+# nvm
+source /usr/share/nvm/init-nvm.sh
