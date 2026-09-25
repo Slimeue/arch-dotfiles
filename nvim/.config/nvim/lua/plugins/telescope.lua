@@ -44,7 +44,7 @@ return {
           file_ignore_patterns = { "%.git/", "node_modules/", "%.cache/" },
         },
         pickers = {
-          find_files = { hidden = true },
+          find_files = { hidden = true, no_ignore = true }, -- show gitignored files like .env (node_modules still excluded above)
         },
         extensions = {
           fzf = {

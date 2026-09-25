@@ -8,6 +8,16 @@ return {
       "nvim-tree/nvim-web-devicons",
     },
     cmd = "Neotree",
+    opts = {
+      filesystem = {
+        filtered_items = {
+          visible = true, -- show filtered items (dimmed) instead of hiding them
+          hide_dotfiles = false, -- e.g. .env.local, .gitignore
+          hide_gitignored = false,
+          hide_by_name = { "node_modules", ".git" }, -- still toggle with H
+        },
+      },
+    },
     keys = {
       { "<leader>e", "<cmd>Neotree toggle<cr>", desc = "File explorer" },
       { "<leader>o", "<cmd>Neotree focus<cr>",  desc = "Focus explorer" },
