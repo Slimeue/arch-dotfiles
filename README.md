@@ -11,6 +11,10 @@ cd ~/dotfiles
 stow -t ~ zsh bash git hypr nvim quickshell kitty wofi theme qt6ct htop misc
 ```
 
+## Docs
+
+- `docs/keybinds.md` — every keybind in daily use (Hyprland, caelestia, Neovim, kitty, zsh). `~/notes` links to `docs/`.
+
 ## Not tracked here
 
 - **oh-my-zsh** — `.zshrc` loads two custom plugins that are git clones, not dotfiles:

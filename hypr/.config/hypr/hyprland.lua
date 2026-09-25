@@ -55,12 +55,13 @@ local menu        = "hyprlauncher"
 -- Or execute your favorite apps at launch like this:
 --
 hl.on("hyprland.start", function () 
-	-- lock immediately at session start (stands in for a display manager)
-	hl.exec_cmd("hyprlock")
+	-- restore the remembered shell, then lock immediately (stands in for a
+	-- display manager); the lock follows the shell: caelestia's lock under
+	-- caelestia, else hyprlock. First, so the lock comes up before the apps.
+	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/shell-restore.sh --lock")
 	hl.exec_cmd(terminal)
 	hl.exec_cmd("nm-applet")
-	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/shell-restore.sh")
-	hl.exec_cmd("librewolf")
+	hl.exec_cmd("firefox")
 	-- wallpaper daemon + re-apply the last used wallpaper
 	hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper-restore.sh")
 	hl.exec_cmd("hyprpolkitagent")
@@ -124,10 +125,12 @@ local colors = (function()
     }
 end)()
 
+local gapsOut = 20
+
 hl.config({
     general = {
         gaps_in  = 5,
-        gaps_out = 20,
+        gaps_out = gapsOut,
 
         border_size = 2,
 
@@ -318,9 +321,9 @@ hl.bind(mainMod .. " + Q", hl.dsp.exec_cmd(terminal))
 local closeWindowBind = hl.bind(mainMod .. " + C", hl.dsp.window.close())
 -- closeWindowBind:set_enabled(false)
 hl.bind(mainMod .. " + M", hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch exit"))
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))
+-- hl.bind(mainMod .. " + L", hl.dsp.exec_cmd("hyprlock"))  -- moved to caelestia-gated bind below
 hl.bind(mainMod .. " + E", hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))
+-- hl.bind(mainMod .. " + V", hl.dsp.window.float({ action = "toggle" }))  -- moved to caelestia-gated bind below
 hl.bind(mainMod .. " + R", hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + P", hl.dsp.window.pseudo())
 
@@ -334,13 +337,53 @@ hl.bind(mainMod .. " + CTRL + W", hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config
 hl.bind(mainMod .. " + J", hl.dsp.layout("togglesplit"))    -- dwindle only
 
 -- Other Utils
-hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("hyprshot -m region"))
+-- hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("hyprshot -m region"))  -- moved to caelestia-gated bind below
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
 hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
 hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
 hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+
+-- Move the focused tile into the neighbouring slot (re-inserts it in the layout tree).
+-- movewindow parks a floating window flush against the screen edge; nudge it back in
+-- by gaps_out so floaters line up with the tiles. Tiled windows are untouched.
+local function moveWindow(direction)
+    return function()
+        hl.dispatch(hl.dsp.window.move({ direction = direction }))
+        local win = hl.get_active_window()
+        if not (win and win.floating) then
+            return
+        end
+        local dx = direction == "left" and gapsOut or direction == "right" and -gapsOut or 0
+        local dy = direction == "up" and gapsOut or direction == "down" and -gapsOut or 0
+        hl.dispatch(hl.dsp.window.move({ x = dx, y = dy, relative = true }))
+    end
+end
+hl.bind(mainMod .. " + SHIFT + left",  moveWindow("left"),  { description = "Move window left" })
+hl.bind(mainMod .. " + SHIFT + right", moveWindow("right"), { description = "Move window right" })
+hl.bind(mainMod .. " + SHIFT + up",    moveWindow("up"),    { description = "Move window up" })
+hl.bind(mainMod .. " + SHIFT + down",  moveWindow("down"),  { description = "Move window down" })
+
+-- Swap places with the neighbour, layout tree unchanged
+hl.bind(mainMod .. " + ALT + left",  hl.dsp.window.swap({ direction = "left" }),  { description = "Swap window left" })
+hl.bind(mainMod .. " + ALT + right", hl.dsp.window.swap({ direction = "right" }), { description = "Swap window right" })
+hl.bind(mainMod .. " + ALT + up",    hl.dsp.window.swap({ direction = "up" }),    { description = "Swap window up" })
+hl.bind(mainMod .. " + ALT + down",  hl.dsp.window.swap({ direction = "down" }),  { description = "Swap window down" })
+
+-- Resize the focused window (tiled or floating); repeats while held
+hl.bind(mainMod .. " + CTRL + left",  hl.dsp.window.resize({ x = -40, y = 0,   relative = true }), { repeating = true, description = "Shrink window horizontally" })
+hl.bind(mainMod .. " + CTRL + right", hl.dsp.window.resize({ x = 40,  y = 0,   relative = true }), { repeating = true, description = "Grow window horizontally" })
+hl.bind(mainMod .. " + CTRL + up",    hl.dsp.window.resize({ x = 0,   y = -40, relative = true }), { repeating = true, description = "Shrink window vertically" })
+hl.bind(mainMod .. " + CTRL + down",  hl.dsp.window.resize({ x = 0,   y = 40,  relative = true }), { repeating = true, description = "Grow window vertically" })
+
+-- Fullscreen (covers the bar) / maximised (keeps bar and gaps); both toggle
+hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen({ mode = "fullscreen" }), { description = "Toggle fullscreen" })
+hl.bind(mainMod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized" }),  { description = "Toggle maximised" })
+
+-- Float toggle that also works under caelestia (SUPER + V is the clipboard there), and centre a floater
+hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.float({ action = "toggle" }), { description = "Toggle floating" })
+hl.bind(mainMod .. " + ALT + C",   hl.dsp.window.center(),                     { description = "Centre floating window" })
 
 -- Switch workspaces with mainMod + [0-9]
 -- Move active window to a workspace with mainMod + SHIFT + [0-9]
@@ -367,14 +410,66 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })
-hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })
+-- hl.bind("XF86MonBrightnessUp",  hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"),                  { locked = true, repeating = true })  -- moved to caelestia-gated bind below
+-- hl.bind("XF86MonBrightnessDown",hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"),                  { locked = true, repeating = true })  -- moved to caelestia-gated bind below
 
 -- Requires playerctl
-hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
-hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
-hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+-- hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })  -- moved to caelestia-gated bind below
+-- hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })  -- moved to caelestia-gated bind below
+-- hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })  -- moved to caelestia-gated bind below
+-- hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })  -- moved to caelestia-gated bind below
+
+-- Caelestia shell (only active while the caelestia quickshell config is running; see scripts/shell-bind.sh)
+-- Keys shared with a bind above go through shell-bind.sh, which runs the
+-- caelestia action under caelestia and the original command under any other
+-- config; the originals are commented out above so the key doesn't fire twice.
+-- Plain global shortcuts need no gate: nobody owns them without caelestia.
+local shellBind = os.getenv("HOME") .. "/.config/hypr/scripts/shell-bind.sh"
+-- %q double-quotes each command; its \" and \\ escapes are ones sh undoes too,
+-- but $ and ` are left alone, so commands must not rely on those.
+local function gated(caelestiaCmd, fallbackCmd)
+    return hl.dsp.exec_cmd(string.format("%s %q %q", shellBind, caelestiaCmd, fallbackCmd or ""))
+end
+-- Shell command that fires a caelestia global shortcut. Under a Lua config
+-- `hyprctl dispatch` takes a Lua dispatcher expression, not `global <name>`.
+local function globalCmd(name)
+    return string.format([[hyprctl dispatch "hl.dsp.global('caelestia:%s')"]], name)
+end
+
+-- Shared keys: caelestia action, else the original bind's command
+hl.bind(mainMod .. " + L",         gated(globalCmd("lock"), "hyprlock"))
+hl.bind(mainMod .. " + V",         gated("caelestia clipboard", "hyprctl dispatch \"hl.dsp.window.float({ action = 'toggle' })\""))
+hl.bind(mainMod .. " + SHIFT + S", gated(globalCmd("screenshotFreeze"), "hyprshot -m region"))
+hl.bind("XF86MonBrightnessUp",     gated(globalCmd("brightnessUp"), "brightnessctl -e4 -n2 set 5%+"),   { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown",   gated(globalCmd("brightnessDown"), "brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+hl.bind("XF86AudioNext",           gated(globalCmd("mediaNext"), "playerctl next"),         { locked = true })
+hl.bind("XF86AudioPause",          gated(globalCmd("mediaToggle"), "playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPlay",           gated(globalCmd("mediaToggle"), "playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPrev",           gated(globalCmd("mediaPrev"), "playerctl previous"),     { locked = true })
+
+-- Global shortcuts: inert unless caelestia has registered them
+hl.bind(mainMod .. " + SUPER_L",           hl.dsp.global("caelestia:launcher"), { release = true })
+hl.bind(mainMod .. " + K",                 hl.dsp.global("caelestia:showall"))
+hl.bind(mainMod .. " + N",                 hl.dsp.global("caelestia:sidebar"))
+hl.bind("CTRL + ALT + Delete",             hl.dsp.global("caelestia:session"))
+hl.bind("CTRL + ALT + C",                  hl.dsp.global("caelestia:clearNotifs"), { locked = true })
+hl.bind(mainMod .. " + SHIFT + ALT + S",   hl.dsp.global("caelestia:screenshot"))
+hl.bind("CTRL + " .. mainMod .. " + Space",     hl.dsp.global("caelestia:mediaToggle"), { locked = true })
+hl.bind("CTRL + " .. mainMod .. " + Equal",     hl.dsp.global("caelestia:mediaNext"),   { locked = true })
+hl.bind("CTRL + " .. mainMod .. " + Minus",     hl.dsp.global("caelestia:mediaPrev"),   { locked = true })
+hl.bind("CTRL + " .. mainMod .. " + Backspace", hl.dsp.global("caelestia:mediaStop"),   { locked = true })
+hl.bind("XF86AudioStop",                   hl.dsp.global("caelestia:mediaStop"),   { locked = true })
+hl.bind(mainMod .. " + ALT + M",           hl.dsp.global("caelestia:spotify"))
+hl.bind(mainMod .. " + ALT + T",           hl.dsp.global("caelestia:clock"))
+
+-- CLI-driven actions: no fallback, so a no-op under other configs
+hl.bind("Print",                         gated("caelestia screenshot"))
+hl.bind(mainMod .. " + Period",          gated("caelestia emoji -p"))
+hl.bind(mainMod .. " + ALT + V",         gated("caelestia clipboard -d"))
+hl.bind("CTRL + ALT + R",                gated("caelestia record"))
+hl.bind(mainMod .. " + ALT + R",         gated("caelestia record -s"))
+hl.bind(mainMod .. " + SHIFT + ALT + R", gated("caelestia record -r"))
+hl.bind(mainMod .. " + ALT + L",         gated("caelestia shell -d; " .. globalCmd("lock")))
 
 
 --------------------------------
@@ -430,4 +525,24 @@ hl.window_rule({
     -- window keeps from every other edge; harmless under the top-bar config.
     move  = "76 monitor_h-120",
     float = true,
+})
+
+-- Caelestia Spotify window (modules/spotify in the shell config)
+hl.window_rule({
+    name   = "caelestia-spotify-window",
+    match  = { class = "^org\\.quickshell$", title = "^Spotify$" },
+
+    float  = true,
+    size   = "520 720",
+    center = true,
+})
+
+-- Caelestia clock window (modules/clock in the shell config)
+hl.window_rule({
+    name   = "caelestia-clock-window",
+    match  = { class = "^org\\.quickshell$", title = "^Clock$" },
+
+    float  = true,
+    size   = "360 200",
+    center = true,
 })

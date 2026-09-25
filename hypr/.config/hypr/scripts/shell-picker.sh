@@ -8,9 +8,10 @@ APPLY="$HOME/.config/hypr/scripts/shell-apply.sh"
 
 [ -d "$QS_DIR" ] || { notify-send "Quickshell" "No such directory: $QS_DIR"; exit 1; }
 
-# A config is any immediate subdirectory holding a shell.qml. -H: $QS_DIR is a
-# stow symlink, which find would not descend into otherwise.
-mapfile -t CONFIGS < <(find -H "$QS_DIR" -mindepth 2 -maxdepth 2 -name shell.qml \
+# A config is any immediate subdirectory holding a shell.qml. -L: $QS_DIR is a
+# stow symlink, and a config dir may be one too (caelestia links to a git
+# clone); find would not descend into either otherwise.
+mapfile -t CONFIGS < <(find -L "$QS_DIR" -mindepth 2 -maxdepth 2 -name shell.qml \
     -printf '%h\n' | xargs -r -n1 basename | sort)
 
 [ "${#CONFIGS[@]}" -gt 0 ] || { notify-send "Quickshell" "No configs in $QS_DIR"; exit 1; }
