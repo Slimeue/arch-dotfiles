@@ -9,7 +9,7 @@ return {
       require("nvim-treesitter.configs").setup({
         -- Parsers compiled on first launch; more are fetched on demand.
         ensure_installed = {
-          "bash", "c", "diff", "lua", "luadoc", "markdown", "markdown_inline",
+          "bash", "c", "cmake", "cpp", "diff", "lua", "luadoc", "markdown", "markdown_inline",
           "python", "qmldir", "qmljs", "query", "regex", "toml", "vim", "vimdoc", "yaml", "json",
         },
         auto_install = true,

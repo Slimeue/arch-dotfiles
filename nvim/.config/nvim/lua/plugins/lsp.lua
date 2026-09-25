@@ -20,6 +20,10 @@ return {
       vim.lsp.config("qmlls", { cmd = { "qmlls6" } })
       vim.lsp.enable("qmlls")
 
+      -- C / C++. Reads compile_commands.json (or a .clangd file) from the
+      -- project root for include paths and flags; formats via clang-format.
+      vim.lsp.enable("clangd")
+
       vim.diagnostic.config({
         virtual_text = true,
         severity_sort = true,
